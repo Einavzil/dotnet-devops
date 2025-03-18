@@ -81,7 +81,7 @@ jobs:
     steps:
     - name: Fill in the new image ID in the testing task definition
       run: |
-        sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}|g" testing-task-definition.json > testings-task-definition-computed.json
+        sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}|g" .infra/testing-task-definition.json > testings-task-definition-computed.json
       env:
         ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
         ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
@@ -103,7 +103,7 @@ jobs:
     steps:
       - name: Fill in the new image ID in the production task definition
         run: |
-          sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}|g" production-task-definition.json > production-task-definition-computed.json
+          sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}|g" .infra/production-task-definition.json > production-task-definition-computed.json
         env:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
