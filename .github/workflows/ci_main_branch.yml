@@ -31,8 +31,9 @@ jobs:
     - name: Get Next Version
       id: get_version
       uses: anothrNick/github-tag-action@1.65.0 #Use a specific version for stability.
-      with:
-        args: --github-token ${{ secrets.GITHUB_TOKEN }} --default-bump patch --dry-run
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DRY_RUN: true
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
