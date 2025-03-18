@@ -90,8 +90,6 @@ jobs:
         wait-for-service-stability: true
       env:
         AWS_REGION: eu-central-1
-      environment:
-        name: testing
   deploy-production:
     needs: deploy-testing
     environment: production
@@ -115,5 +113,3 @@ jobs:
           wait-for-service-stability: true
         env:
           AWS_REGION: eu-central-1
-        environment:
-          name: production
