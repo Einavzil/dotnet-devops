@@ -28,18 +28,13 @@ jobs:
     - name: Check code format
       run: dotnet format --verify-no-changes
 
-    - name: Get latest release version
-      id: get_latest_release
-      run: |
-        latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1) 2>/dev/null || echo "")
-        echo "Latest tag: $latest_tag"
-        if [ -z "$latest_tag" ]; then
-          new_version="v1.0.0"
-        else
-          new_version=$(echo $latest_tag | awk -F. -v OFS=. '{$NF++;print}')
-        fi
-        echo "New version: $new_version"
-        echo "::set-output name=new_version::$new_version"
+    - name: Get Next Version
+      id: get_version
+      uses: anothrNick/github-tag-action@1.65.0 #Use a specific version for stability.
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        default_bump: patch  # What to do if no tag is found.
+        dry_run: true      # IMPORTANT: Prevents tag creation/pushing.
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -56,7 +51,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
         ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-        IMAGE_TAG: ${{ steps.get_latest_release.outputs.new_version }}
+        IMAGE_TAG: ${{ steps.get_version.outputs.new_tag }}
       run: |
         echo $ECR_REGISTRY
         echo $ECR_REPOSITORY
@@ -69,8 +64,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.get_latest_release.outputs.new_version }}
-        release_name: Release ${{ steps.get_latest_release.outputs.new_version }}
+        tag_name: ${{ steps.get_version.outputs.new_tag }}
+        release_name: Release ${{ steps.get_version.outputs.new_tag }}
         draft: false
         prerelease: false
 
