@@ -5,10 +5,8 @@ on:
     branches: [ main ]
 
 jobs:
-  build image:
-
+  build-image:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -28,7 +26,7 @@ jobs:
       run: dotnet test --no-build
       
     - name: Check code format
-      run: dotnet format --check --verbosity diagnostic
+      run: dotnet format --verify-no-changes
 
     - name: Get latest release version
       id: get_latest_release
@@ -70,44 +68,52 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Fill in the new image ID in the staging task definition
+  deploy-testing:
+    needs: build-image
+    environment: testing
+    runs-on: ubuntu-latest
+    steps:
+    - name: Fill in the new image ID in the testing task definition
       run: |
-        sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}|g" staging-task-definition.json > staging-task-definition-computed.json
+        sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}|g" testing-task-definition.json > testings-task-definition-computed.json
       env:
         ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
         ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         IMAGE_TAG: ${{ steps.get_latest_release.outputs.new_version }}
-
-    # Deploy on staging ECS
-    - name: Deploy to Staging ECS
+    # Deploy on testing ECS
+    - name: Deploy to testing ECS
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: staging-task-definition-computed.json
-        service: staging-service
-        cluster: staging-cluster
+        task-definition: testing-task-definition-computed.json
+        service: testing-service
+        cluster: testing-cluster
         wait-for-service-stability: true
       env:
         AWS_REGION: eu-central-1
       environment:
         name: testing
+  deploy-production:
+    needs: deploy-testing
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fill in the new image ID in the production task definition
+        run: |
+          sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}|g" production-task-definition.json > production-task-definition-computed.json
+        env:
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ steps.get_latest_release.outputs.new_version }}
 
-    - name: Fill in the new image ID in the production task definition
-      run: |
-        sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}|g" production-task-definition.json > production-task-definition-computed.json
-      env:
-        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-        IMAGE_TAG: ${{ steps.get_latest_release.outputs.new_version }}
-        
-    # Deploy on production ECS (manual approval)
-    - name: Deploy to Production ECS
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: production-task-definition-computed.json
-        service: production-service
-        cluster: production-cluster
-        wait-for-service-stability: true
-      env:
-        AWS_REGION: eu-central-1
-      environment:
-        name: production
+      # Deploy on production ECS (manual approval)
+      - name: Deploy to Production ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: production-task-definition-computed.json
+          service: production-service
+          cluster: production-cluster
+          wait-for-service-stability: true
+        env:
+          AWS_REGION: eu-central-1
+        environment:
+          name: production
