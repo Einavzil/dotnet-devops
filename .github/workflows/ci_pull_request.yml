@@ -1,5 +1,5 @@
 name: CI Pull Request
-
+  
 on:
   pull_request:
     branches: [ main ]
@@ -20,8 +20,14 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
 
+    - name: install dotnet format
+      run: dotnet tool install -g dotnet-format
+
     - name: Build
       run: dotnet build --no-restore
 
-    - name: Test
+    - name: Unit tests
       run: dotnet test --no-build --verbosity normal
+
+    - name: Check code format
+      run: dotnet format --verify-no-changes

@@ -25,5 +25,12 @@ namespace MyApp.Tests
             var result = _calculator.Multiply(2, 3);
             Assert.That(result, Is.EqualTo(6));
         }
+
+        [Test]
+        public void Multiply_WhenCalled_ReturnsProductOfNegativeArguments()
+        {
+            var result = _calculator.Multiply(-2, -3);
+            Assert.That(result, Is.EqualTo(6));
+        }
     }
 }
