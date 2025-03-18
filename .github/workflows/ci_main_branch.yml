@@ -32,9 +32,7 @@ jobs:
       id: get_version
       uses: anothrNick/github-tag-action@1.65.0 #Use a specific version for stability.
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        default_bump: patch  # What to do if no tag is found.
-        dry_run: true      # IMPORTANT: Prevents tag creation/pushing.
+        args: --github-token ${{ secrets.GITHUB_TOKEN }} --default-bump patch --dry-run
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
