@@ -105,6 +105,9 @@ jobs:
         uses: actions/checkout@v2
       - name: Fill in the new image ID in the production task definition
         run: |
+          echo "${{ needs.build-image.outputs.image_tag }}"
+          echo "${{ secrets.ECR_REGISTRY }}"
+          echo "${{ secrets.ECR_REPOSITORY }}"
           sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ needs.build-image.outputs.image_tag }}|g" .infra/production-task-definition.json > production-task-definition-computed.json
         env:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
