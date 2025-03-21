@@ -81,16 +81,14 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Fill in the new image ID in the testing task definition
-      working-directory: .infra
       run: |
-        sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ needs.build-image.outputs.image_tag }}|g" testing-task-definition.json > testings-task-definition-computed.json
+        sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ needs.build-image.outputs.image_tag }}|g" .infra/testing-task-definition.json > testing-task-definition-computed.json
       env:
         ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
         ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
     # Deploy on testing ECS
     - name: Deploy to testing ECS
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      working-directory: .infra
       with:
         task-definition: testing-task-definition-computed.json
         service: testing-service
@@ -106,12 +104,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Fill in the new image ID in the production task definition
-        working-directory: .infra
         run: |
           echo "${{ needs.build-image.outputs.image_tag }}"
           echo "${{ secrets.ECR_REGISTRY }}"
           echo "${{ secrets.ECR_REPOSITORY }}"
-          sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ needs.build-image.outputs.image_tag }}|g" production-task-definition.json > production-task-definition-computed.json
+          sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ needs.build-image.outputs.image_tag }}|g" .infra/production-task-definition.json > production-task-definition-computed.json
         env:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
@@ -119,7 +116,6 @@ jobs:
       # Deploy on production ECS (manual approval)
       - name: Deploy to Production ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        working-directory: .infra
         with:
           task-definition: production-task-definition-computed.json
           service: production-service
