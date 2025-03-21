@@ -92,7 +92,7 @@ jobs:
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       working-directory: .infra
       with:
-        task-definition: .infra/testing-task-definition-computed.json
+        task-definition: testing-task-definition-computed.json
         service: testing-service
         cluster: testing-cluster
         wait-for-service-stability: true
