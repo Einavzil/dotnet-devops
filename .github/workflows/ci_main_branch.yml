@@ -90,7 +90,7 @@ jobs:
     - name: Deploy to testing ECS
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: testing-task-definition-computed.json
+        task-definition: .infra/testing-task-definition-computed.json
         service: testing-service
         cluster: testing-cluster
         wait-for-service-stability: true
@@ -117,7 +117,7 @@ jobs:
       - name: Deploy to Production ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: production-task-definition-computed.json
+          task-definition: .infra/production-task-definition-computed.json
           service: production-service
           cluster: production-cluster
           wait-for-service-stability: true
