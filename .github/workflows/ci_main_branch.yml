@@ -85,7 +85,7 @@ jobs:
       run: |
         echo "${{ needs.build-image.outputs.image_tag }}"
         echo "${{ secrets.ECR_REGISTRY }}"
-        echo "${{ secrets.ECR_REPOSITORY }}
+        echo "${{ secrets.ECR_REPOSITORY }}"
         sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ needs.build-image.outputs.image_tag }}|g" .infra/testing-task-definition.json > testing-task-definition-computed.json
       env:
         ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
