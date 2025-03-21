@@ -5,7 +5,7 @@
     "taskRoleArn": "arn:aws:iam::713881784189:role/ecsTaskExecutionRole",
     "containerDefinitions": [
       {
-        "name": "production-container",
+        "name": "webapp-production",
         "image": "<IMAGE_URI>",
         "essential": true,
         "portMappings": [
