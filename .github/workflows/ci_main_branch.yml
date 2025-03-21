@@ -67,19 +67,24 @@ jobs:
         release_name: Release ${{ steps.get_version.outputs.new_tag }}
         draft: false
         prerelease: false
+    - name: Set variables for next jobs
+      id: set_vars
+      run: |
+        echo "::set-output name=image_tag::${{ steps.get_version.outputs.new_tag }}"
 
   deploy-testing:
     needs: build-image
     environment: testing
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
     - name: Fill in the new image ID in the testing task definition
       run: |
-        sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}|g" .infra/testing-task-definition.json > testings-task-definition-computed.json
+        sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ needs.build-image.outputs.image_tag }}|g" .infra/testing-task-definition.json > testings-task-definition-computed.json
       env:
         ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
         ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-        IMAGE_TAG: ${{ steps.get_latest_release.outputs.new_version }}
     # Deploy on testing ECS
     - name: Deploy to testing ECS
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
@@ -95,13 +100,14 @@ jobs:
     environment: production
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: Fill in the new image ID in the production task definition
         run: |
-          sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}|g" .infra/production-task-definition.json > production-task-definition-computed.json
+          sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ needs.build-image.outputs.image_tag }}|g" .infra/production-task-definition.json > production-task-definition-computed.json
         env:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-          IMAGE_TAG: ${{ steps.get_latest_release.outputs.new_version }}
 
       # Deploy on production ECS (manual approval)
       - name: Deploy to Production ECS
