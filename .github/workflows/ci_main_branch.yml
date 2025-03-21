@@ -80,13 +80,23 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+
     - name: Fill in the new image ID in the testing task definition
       run: |
+        echo "${{ needs.build-image.outputs.image_tag }}"
+        echo "${{ secrets.ECR_REGISTRY }}"
+        echo "${{ secrets.ECR_REPOSITORY }}
         sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ needs.build-image.outputs.image_tag }}|g" .infra/testing-task-definition.json > testing-task-definition-computed.json
       env:
         ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
         ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
     # Deploy on testing ECS
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
+        aws-region: eu-central-1
     - name: Deploy to testing ECS
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
@@ -112,7 +122,12 @@ jobs:
         env:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
+          aws-region: eu-central-1
       # Deploy on production ECS (manual approval)
       - name: Deploy to Production ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
