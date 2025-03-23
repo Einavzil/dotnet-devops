@@ -6,9 +6,11 @@ on:
       image_tag:
         required: true
         description: 'The image tag to deploy'
+        type: string
       environment:
         required: true
         description: 'The environment to deploy to (e.g., testing, production)'
+        type: string
 
 jobs:
   deploy-ecs:
