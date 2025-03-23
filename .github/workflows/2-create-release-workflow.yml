@@ -1,0 +1,54 @@
+name: Create Release
+
+on:
+  workflow_call:
+      
+jobs:
+  create-release-workflow:
+    outputs:
+      image_tag: ${{ steps.get_version.outputs.new_tag }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Get Next Version
+      id: get_version
+      uses: anothrNick/github-tag-action@1.65.0 #Use a specific version for stability.
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DRY_RUN: true
+        WITH_V: true
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
+        aws-region: eu-central-1
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push Docker image
+      env:
+        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+        IMAGE_TAG: ${{ steps.get_version.outputs.new_tag }}
+      run: |
+        echo $ECR_REGISTRY
+        echo $ECR_REPOSITORY
+        echo $IMAGE_TAG
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+    - name: Create GitHub release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.get_version.outputs.new_tag }}
+        release_name: Release ${{ steps.get_version.outputs.new_tag }}
+        draft: false
+        prerelease: false

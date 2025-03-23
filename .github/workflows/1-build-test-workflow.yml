@@ -1,15 +1,13 @@
-name: CI Pull Request
-  
+name: Build and Test
+
 on:
-  pull_request:
-    branches: [ main ]
+  workflow_call:
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout
+    - name: Checkout Code
       uses: actions/checkout@v4
 
     - name: Setup .NET
