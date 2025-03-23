@@ -22,7 +22,7 @@ jobs:
       environment: testing
   
   call-deploy-production-ecs-module:
-    uses: ./.github/workflows/3-deploy-ecs-workflow.yml
+    uses: ./.github/workflows/3-deploy-ecs-module.yml
     needs: call-create-release-module
     secrets: inherit
     with:
