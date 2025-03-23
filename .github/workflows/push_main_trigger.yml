@@ -5,26 +5,26 @@ on:
     branches: [ main ]
 
 jobs:
-  call-build-test-workflow:
-    uses: ./.github/workflows/1-build-test-workflow.yml
+  call-build-test-module:
+    uses: ./.github/workflows/1-build-test-module.yml
   
-  call-create-release-worfkflow:
-    uses: ./.github/workflows/2-create-release-workflow.yml
-    needs: call-build-test-workflow
+  call-create-release-module:
+    uses: ./.github/workflows/2-create-release-module.yml
+    needs: call-build-test-module
     secrets: inherit
 
-  call-deploy-testing-ecs-workflow:
-    uses: ./.github/workflows/3-deploy-ecs-workflow.yml
-    needs: call-create-release-worfkflow
+  call-deploy-testing-ecs-module:
+    uses: ./.github/workflows/3-deploy-ecs-module.yml
+    needs: call-create-release-module
     secrets: inherit
     with:
-      image_tag: ${{ needs.call-create-release-worfkflow.outputs.image_tag }}
+      image_tag: ${{ needs.call-create-release-module.outputs.image_tag }}
       environment: testing
   
-  call-deploy-production-ecs-workflow:
+  call-deploy-production-ecs-module:
     uses: ./.github/workflows/3-deploy-ecs-workflow.yml
-    needs: call-create-release-worfkflow
+    needs: call-create-release-module
     secrets: inherit
     with:
-      image_tag: ${{ needs.call-create-release-worfkflow.outputs.image_tag }}
+      image_tag: ${{ needs.call-create-release-module.outputs.image_tag }}
       environment: production

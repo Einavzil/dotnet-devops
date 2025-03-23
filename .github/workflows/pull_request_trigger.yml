@@ -5,5 +5,5 @@ on:
     branches: [ main ]
 
 jobs:
-  call-build-test-workflow:
-    uses: ./.github/workflows/1-build-test-workflow.yml
+  call-build-test-module:
+    uses: ./.github/workflows/1-build-test-module.yml

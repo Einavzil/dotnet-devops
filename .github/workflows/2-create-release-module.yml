@@ -5,9 +5,9 @@ on:
     outputs:
       image_tag:
         description: "The new image tag created in this workflow"
-        value: ${{ jobs.create-release-workflow.outputs.image_tag }}
+        value: ${{ jobs.create-release.outputs.image_tag }}
 jobs:
-  create-release-workflow:
+  create-release:
     outputs:
       image_tag: ${{ steps.get_version.outputs.new_tag }}
     runs-on: ubuntu-latest
