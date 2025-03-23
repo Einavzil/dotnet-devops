@@ -22,7 +22,8 @@ jobs:
 
     - name: Fill in the new image ID in the task definition
       run: |
-        sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ inputs.image_tag }}|g" .infra/${{inputs.environment}}-task-definition.json > computed-task-definition.json
+        sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ inputs.image_tag }}|g" \
+            .infra/${{inputs.environment}}-task-definition.json > computed-task-definition.json
       env:
         ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
         ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
