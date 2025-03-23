@@ -2,7 +2,10 @@ name: Create Release
 
 on:
   workflow_call:
-      
+    outputs:
+      image_tag:
+        description: "The new image tag created in this workflow"
+        value: ${{ jobs.create-release-workflow.outputs.image_tag }}
 jobs:
   create-release-workflow:
     outputs:
