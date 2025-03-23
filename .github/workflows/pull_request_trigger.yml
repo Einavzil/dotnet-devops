@@ -1,0 +1,9 @@
+name: CI Pull Request
+  
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  call-build-test-workflow:
+    uses: ./.github/workflows/1-build-test-workflow.yml
