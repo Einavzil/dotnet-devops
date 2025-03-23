@@ -3,29 +3,24 @@ name: Deploy ECS
 on:
   workflow_call:
     inputs:
-      task_definition_file:
-        required: true
-        description: 'The file name of the task definition file'
-      cluster_name:
-        required: true
-        description: 'The name of the ECS cluster'
-      service_name:
-        required: true
-        description: 'The name of the ECS service'
       image_tag:
         required: true
         description: 'The image tag to deploy'
+      environment:
+        required: true
+        description: 'The environment to deploy to (e.g., testing, production)'
 
 jobs:
   deploy-ecs:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
     - name: Fill in the new image ID in the task definition
       run: |
-        sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ inputs.image_tag }}|g" .infra/${{inputs.task_definition_file}} > computed-task-definition.json
+        sed -e "s|<IMAGE_URI>|${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ inputs.image_tag }}|g" .infra/${{inputs.environment}}-task-definition.json > computed-task-definition.json
       env:
         ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
         ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
@@ -41,8 +36,8 @@ jobs:
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: computed-task-definition.json
-        service: ${{inputs.service_name}}
-        cluster: ${{inputs.cluster_name}}
+        service: ${{inputs.environment}}-service
+        cluster: ${{inputs.environment}}-cluster
         wait-for-service-stability: true
       env:
         AWS_REGION: eu-central-1

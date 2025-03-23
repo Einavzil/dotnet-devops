@@ -17,20 +17,14 @@ jobs:
     uses: ./.github/workflows/3-deploy-ecs-workflow.yml
     needs: call-create-release-worfkflow
     secrets: inherit
-    environment: testing
-    inputs:
+    with:
       image_tag: ${{ needs.call-create-release-worfkflow.outputs.image_tag }}
-      task_definition_file: testing-task-definition.json
-      cluster_name: testing-cluster
-      service_name: testing-service
+      environment: testing
   
   call-deploy-production-ecs-workflow:
     uses: ./.github/workflows/3-deploy-ecs-workflow.yml
     needs: call-create-release-worfkflow
     secrets: inherit
-    environment: production
-    inputs:
+    with:
       image_tag: ${{ needs.call-create-release-worfkflow.outputs.image_tag }}
-      task_definition_file: production-task-definition.json
-      cluster_name: production-cluster
-      service_name: production-service
+      environment: production
